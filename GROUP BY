@@ -1,0 +1,8 @@
+SELECT  MAX(t2.brand_name) AS name, t2.brand_id , t1.model_year , count(*) AS count ,AVG(t1.list_price) AS [Price AVG]
+FROM production.products AS t1
+INNER JOIN production.brands AS t2 ON t1.brand_id = t2.brand_id
+GROUP BY t2.brand_id , t1.model_year
+ORDER BY t2.brand_id
+
+SELECT * FROM production.[products]
+WHERE brand_id = 9  
