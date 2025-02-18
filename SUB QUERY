@@ -1,0 +1,62 @@
+SELECT * FROM sales.customers
+WHERE customer_id IN
+	( SELECT customer_id FROM sales.orders
+	  WHERE order_id IN (	
+			SELECT t3.order_id FROM sales.order_items AS t3
+			GROUP BY t3.order_id
+			HAVING COUNT(*) > 2 )
+	)
+
+
+SELECT * 
+FROM sales.staffs
+WHERE staff_id IN (
+	SELECT staff_id FROM sales.orders
+	GROUP BY staff_id
+	HAVING COUNT(*) > 150
+	)
+
+
+SELECT * FROM sales.staffs
+WHERE staff_id IN (
+	SELECT manager_id FROM sales.staffs
+)
+UNION ALL
+SELECT * FROM sales.staffs
+
+
+SELECT t1.first_name AS Manager , t2.first_name AS Staff FROM sales.staffs AS t1
+JOIN sales.staffs AS t2 ON t1.staff_id = t2.manager_id
+
+
+SELECT * FROM sales.staffs AS t1
+SELECT * FROM sales.stores
+
+SELECT t1.first_name + ' ' + t1.last_name AS [full name] , t2.store_name 
+FROM sales.staffs AS t1
+INNER JOIN sales.stores AS t2 ON t1.store_id = t2.store_id
+
+
+
+SELECT * 
+FROM production.products
+WHERE product_id IN (
+	SELECT product_id FROM sales.order_items
+	GROUP BY product_id
+	HAVING COUNT(*) > 80
+)
+
+
+SELECT * FROM production.products
+WHERE product_id NOT IN (
+	SELECT product_id FROM sales.order_items
+	GROUP BY product_id
+	)
+
+
+SELECT * FROM production.products AS t1
+LEFT JOIN sales.order_items AS t2 ON t1.product_id = t2.product_id
+WHERE item_id IS NULL
+
+
+
