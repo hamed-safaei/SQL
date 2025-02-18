@@ -1,0 +1,8 @@
+SELECT Name, ISNULL(Salary, 0) AS Salary  
+FROM Employees;
+
+SELECT Name, COALESCE(PhoneNumber, Email, 'No Contact Info') AS Contact  
+FROM Employees;
+
+SELECT Name, NULLIF(Salary, 5000) AS Salary  
+FROM Employees;
