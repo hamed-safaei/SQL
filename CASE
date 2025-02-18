@@ -1,0 +1,13 @@
+
+SELECT t1.customer_id, SUM(t3.list_price) AS [sum of price] , COUNT(*) AS [count of item] ,
+CASE 
+	WHEN SUM(t3.list_price) > 20000.00 THEN 'number 1'
+	WHEN SUM(t3.list_price) BETWEEN 10000.00 AND 20000.00 THEN 'number 2'
+	WHEN SUM(t3.list_price) BETWEEN 0 AND 10000.00 THEN 'number 3'
+	ELSE 'not valid'
+END AS score
+FROM sales.customers AS t1
+INNER JOIN sales.orders AS t2 ON t1.customer_id = t2.customer_id
+INNER JOIN sales.order_items AS t3 ON t2.order_id = t3.order_id
+GROUP BY t1.customer_id 
+ORDER BY SUM(t3.list_price) DESC
