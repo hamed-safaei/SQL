@@ -1,0 +1,45 @@
+
+BACKUP DATABASE airport
+TO DISK = 'D:\backup\airport_full.bak'
+
+
+USE master
+ALTER DATABASE airport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+GO
+RESTORE DATABASE airport  
+FROM DISK = 'D:\backup\airport_full.bak'  
+WITH REPLACE, RECOVERY, STATS = 10;
+GO
+ALTER DATABASE airport SET MULTI_USER;
+
+USE airport
+SELECT * FROM dbo.Passangers
+
+INSERT INTO dbo.Passangers
+VALUES(91282110 , 'amir' , 82 , 'jamali')
+
+
+BACKUP DATABASE airport
+TO DISK = 'D:\backup\airport_diff1.bak'
+WITH DIFFERENTIAL 
+
+
+USE master;
+ALTER DATABASE airport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+RESTORE DATABASE airport  
+FROM DISK = 'D:\backup\airport_full.bak'  
+WITH NORECOVERY, REPLACE;
+
+RESTORE DATABASE airport  
+FROM DISK = 'D:\backup\airport_diff1.bak'  
+WITH RECOVERY, STATS = 10;
+
+ALTER DATABASE airport SET MULTI_USER;
+
+
+
+
+
+
+
+
