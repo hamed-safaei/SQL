@@ -1,0 +1,8 @@
+SELECT 
+    SUBSTRING(Salary_Estimate, 
+              1, 
+              CHARINDEX('(', Salary_Estimate) - 1) AS ExtractedData
+FROM 
+    dbo.Uncleaned_DS_jobs
+WHERE 
+    CHARINDEX('(', Salary_Estimate) > 0;
