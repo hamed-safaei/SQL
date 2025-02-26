@@ -1,0 +1,7 @@
+SELECT t2.OrganizationName  , t3.DepartmentGroupName  , CONCAT(t4.MonthNumberOfYear, '-' , t4.DayNumberOfMonth), SUM(t1.Amount) AS [sum of amount] FROM dbo.FactFinance AS t1
+INNER JOIN dbo.DimOrganization AS t2 ON t1.OrganizationKey = t2.OrganizationKey
+INNER JOIN dbo.DimDepartmentGroup AS t3 ON t1.DepartmentGroupKey = t3.DepartmentGroupKey
+INNER JOIN dbo.DimDate AS t4 ON t1.DateKey = t4.DateKey
+
+GROUP BY t2.OrganizationName  , t3.DepartmentGroupName  , CONCAT(t4.MonthNumberOfYear, '-' , t4.DayNumberOfMonth)
+ORDER BY t2.OrganizationName  , t3.DepartmentGroupName 
