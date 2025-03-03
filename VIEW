@@ -1,0 +1,12 @@
+CREATE VIEW customer_order_details AS
+SELECT t1.customer_id, t1.first_name, t1.last_name, t1.email, t1.city, t2.order_date, t2.order_id, t3.item_id,
+       t5.product_name, t6.category_name, t7.brand_name, t5.model_year, t3.list_price, t3.discount, t4.store_name
+FROM sales.customers t1
+INNER JOIN sales.orders t2 ON t1.customer_id = t2.customer_id
+INNER JOIN sales.order_items t3 ON t2.order_id = t3.order_id
+INNER JOIN sales.stores t4 ON t2.store_id = t4.store_id
+INNER JOIN production.products t5 ON t3.product_id = t5.product_id
+INNER JOIN production.categories t6 ON t5.category_id = t6.category_id
+INNER JOIN production.brands t7 ON t5.brand_id = t7.brand_id;
+
+SELECT * FROM customer_order_details
