@@ -1,0 +1,16 @@
+EXEC sp_helpindex 'production.products';
+
+sp_help 'sales.orders'
+
+SELECT * FROM INFORMATION_SCHEMA.TABLES;
+
+SELECT *
+FROM sales.orders
+WHERE customer_id = 102 OR customer_id = 100;
+
+CREATE NONCLUSTERED INDEX idx_customer_id
+ON sales.orders (customer_id);
+
+SELECT * FROM sales.orders
+
+DROP INDEX sales.orders.idx_customer_id
