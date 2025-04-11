@@ -1,0 +1,37 @@
+
+ 
+
+SELECT CAST(GETDATE() AS DATE) AS DayDate INTO Foreachloop
+
+SELECT DayDate FROM Foreachloop
+
+TRUNCATE TABLE Foreachloop ----kol dade haro pak mikone az table vali structure hefz mishe
+
+
+DECLARE @START DATE = '2000-01-01'
+DECLARE @END DATE = '2010-12-30'
+WHILE (@START <= @END)
+BEGIN
+    INSERT INTO Foreachloop
+    SELECT @START
+    SET @START = DATEADD(day, 1, @START)
+END
+
+
+SELECT 
+    CAST(GETDATE() AS date) AS engDate,  -- تاریخ میلادی به فرمت date
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd'), 6) AS engYearMonth,  -- سال و ماه میلادی
+    FORMAT(GETDATE(), 'yyyyMMdd', 'fa_IR') AS perDate,  -- تاریخ شمسی
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa_IR'), 6) AS perYearMonth,  -- سال و ماه شمسی
+    RIGHT(LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa_IR'), 6), 2) AS perMonth  -- ماه شمسی
+
+
+SELECT 
+    CAST(? AS date) AS engDate, 
+    LEFT(FORMAT(CAST(? AS date), 'yyyyMMdd'), 6) AS engYearMonth,      
+    FORMAT(CAST(? AS date), 'yyyyMMdd', 'fa_IR') AS perDate,   
+    LEFT(FORMAT(CAST(? AS date), 'yyyyMMdd', 'fa_IR'), 6) AS perYearMonth, 
+    RIGHT(LEFT(FORMAT(CAST(? AS date), 'yyyyMMdd', 'fa_IR'), 6), 2) AS perMonth  
+
+SELECT * FROM DimDate
+ORDER BY EngDate
