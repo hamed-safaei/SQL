@@ -1,0 +1,20 @@
+WITH CTE AS (
+    -- مرحله اول (Anchor): پیدا کردن مدیران اصلی (اونایی که مدیر ندارن)
+    SELECT 
+        staff_id,
+        first_name + ' ' + last_name AS fullName,
+        manager_id,
+        1 AS level
+    FROM sales.staffs
+    WHERE manager_id IS NULL
+
+    UNION ALL
+
+    -- مرحله بازگشتی (Recursive): پیدا کردن زیرمجموعه‌ها و تعیین سطح
+    SELECT 
+        s.staff_id,
+        s.first_name + ' ' + s.last_name AS fullName,
+        s.manager_id,
+        c.level + 1
+    FROM CTE c
+    INNER JOIN sales.staffs s ON s.manager_id = c.staff_id
