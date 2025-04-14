@@ -1,0 +1,8 @@
+SELECT c.customer_id , o.order_id , o.order_date
+FROM sales.customers as c
+CROSS APPLY (
+	SELECT TOP 2 * 
+	FROM sales.orders as o
+	WHERE o.customer_id = c.customer_id 
+	ORDER BY o.order_date DESC
+) o
