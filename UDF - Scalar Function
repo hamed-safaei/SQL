@@ -1,0 +1,7 @@
+CREATE FUNCTION FunctionName (@parameter1 TYPE, @parameter2 TYPE)
+RETURNS ReturnType
+AS
+BEGIN
+    -- منطق تابع
+    RETURN <expression>
+END
