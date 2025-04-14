@@ -37,3 +37,58 @@ FROM BF
 LEFT JOIN Delays D ON D.orderid = BF.orderid
 
 
+
+
+----With Temp Table
+
+-- تمپ تیبل اول: BF
+CREATE TABLE #BF (
+    orderid INT,
+    custid INT,
+    AmountBefore MONEY
+);
+
+INSERT INTO #BF
+SELECT 
+    od.orderid, 
+    o.custid, 
+    SUM(qty * unitprice) AS AmountBefore
+FROM Sales.OrderDetails od
+INNER JOIN Sales.Orders o ON o.orderid = od.orderid
+GROUP BY o.custid, od.orderid;
+
+-- تمپ تیبل دوم: Delays
+CREATE TABLE #Delays (
+    orderid INT,
+    CountDelay INT
+);
+
+INSERT INTO #Delays
+SELECT 
+    orderid,
+    DATEDIFF(
+        DAY, 
+        requireddate, 
+        IIF(shippeddate IS NOT NULL, shippeddate, DATEADD(DAY, 40, requireddate))
+    ) AS CountDelay
+FROM sales.Orders
+WHERE DATEDIFF(
+        DAY, 
+        requireddate, 
+        IIF(shippeddate IS NOT NULL, shippeddate, DATEADD(DAY, 40, requireddate))
+    ) > 0;
+
+
+SELECT 
+    BF.*, 
+    ISNULL(D.CountDelay * 0.001 * BF.AmountBefore, 0) AS Fine,
+    BF.AmountBefore - ISNULL(D.CountDelay * 0.001 * BF.AmountBefore, 0) AS AmountAfter
+FROM #BF BF
+LEFT JOIN #Delays D ON D.orderid = BF.orderid;
+
+
+DROP TABLE #BF;
+DROP TABLE #Delays;
+
+
+
