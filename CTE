@@ -1,0 +1,22 @@
+;WITH BF AS (
+SELECT 
+od.orderid , o.custid , SUM(qty * unitprice) AmountBefore
+FROM Sales.OrderDetails od
+INNER JOIN Sales.Orders o On o.orderid = od.orderid
+GROUP BY o.custid , od.orderid
+),Delays AS (
+SELECT orderid ,
+DATEDIFF(DAY , requireddate , 
+IIF(shippeddate IS NOT NULL , Shippeddate , DATEADD(DAY , 40 , requireddate) )
+) AS CountDelay
+FROM sales.Orders
+WHERE DATEDIFF(DAY , requireddate , 
+IIF(shippeddate IS NOT NULL , Shippeddate , DATEADD(DAY , 40 , requireddate) )
+) > 0
+) 
+SELECT BF.* , ISNULL(D.CountDelay * 0.001 * AmountBefore , 0)Fine,
+AmountBefore - ISNULL(D.CountDelay * 0.001 * AmountBefore , 0) AmountAfter
+FROM BF 
+LEFT JOIN Delays D ON D.orderid = BF.orderid
+
+
