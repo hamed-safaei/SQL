@@ -1,0 +1,36 @@
+DECLARE @DISC1 FLOAT = 0.005
+DECLARE @DISC2 FLOAT = 0.008
+
+;WITH CTE AS (
+    SELECT 
+        C.custid, 
+        C.Companyname,
+        SUM(qty * unitprice * (1 - discount)) AS BeforeChange,
+        SUM(qty * unitprice * (1 - (discount + @DISC1))) AS AfterChange1,
+        SUM(qty * unitprice * (1 - (discount + @DISC2))) AS AfterChange2,
+        ((SUM(qty * unitprice * (1 - (discount + @DISC1))) - SUM(qty * unitprice * (1 - discount))) / 
+         SUM(qty * unitprice * (1 - discount))) * 100 AS ChangeP1,
+        ((SUM(qty * unitprice * (1 - (discount + @DISC2))) - SUM(qty * unitprice * (1 - discount))) / 
+         SUM(qty * unitprice * (1 - discount))) * 100 AS ChangeP2
+    FROM Sales.OrderDetails OD
+    INNER JOIN Sales.Orders O ON O.orderid = OD.orderid
+    INNER JOIN Sales.Customers C ON C.custid = O.custid
+    GROUP BY C.custid, C.Companyname
+), CTEALL AS (
+    SELECT 
+        10000 AS CustID,
+        'ALL' AS CompanyName,
+        SUM(BeforeChange) AS BeforeChange,
+        SUM(AfterChange1) AS AfterChange1,
+        SUM(AfterChange2) AS AfterChange2,
+        ((SUM(AfterChange1) - SUM(BeforeChange)) / SUM(BeforeChange)) * 100 AS ChangeP1,
+        ((SUM(AfterChange2) - SUM(BeforeChange)) / SUM(BeforeChange)) * 100 AS ChangeP2
+    FROM CTE
+) 
+SELECT * FROM CTE
+UNION ALL
+SELECT * FROM CTEALL
+
+
+
+
