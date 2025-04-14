@@ -1,3 +1,20 @@
+
+
+;WITH CTE AS (
+SELECT orderid , productid , unitprice , qty , 
+CASE WHEN discount < 0.05 THEN discount + 0.01
+ELSE discount END  AS NewDiscount ---IIF(discount < 0.05 , discount + 0.01 , discount )
+FROM Sales.OrderDetails
+), CTE2 AS (
+SELECT * , qty * unitprice * ( 1 - NewDiscount ) AS totalSales
+FROM CTE
+)
+SELECT * FROM CTE2
+
+
+----------------------------------------------------
+
+
 ;WITH BF AS (
 SELECT 
 od.orderid , o.custid , SUM(qty * unitprice) AmountBefore
