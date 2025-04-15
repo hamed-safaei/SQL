@@ -1,0 +1,15 @@
+WITH cte AS (
+    SELECT custid, SUM(qty * unitprice) amount
+    FROM Sales.OrderDetails od
+    INNER JOIN Sales.Orders o ON o.orderid = od.orderid
+    GROUP BY custid
+), cte2 AS (
+    SELECT AVG(amount) avgamount, STDEVP(amount) stdamount FROM cte
+), cte3 AS (
+    SELECT *, ((amount - avgamount) / stdamount) zscore
+    FROM cte
+    CROSS JOIN cte2
+)
+SELECT * FROM cte3
+WHERE zscore > 1.96 OR zscore < -1.96;
+
