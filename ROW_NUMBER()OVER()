@@ -1,0 +1,41 @@
+SELECT * ,
+row_number()over(ORDER BY shipperid DESC)rn   
+FROM Sales.Shippers
+
+
+SELECT 
+orderid , orderdate , custid ,
+ROW_NUMBER()OVER(ORDER BY orderdate)rn
+FROM Sales.Orders   
+
+;WITH CTE AS (
+SELECT 
+orderid , orderdate , custid ,
+ROW_NUMBER()OVER(PARTITION BY custid ORDER BY orderdate)rn
+FROM Sales.Orders
+)
+SELECT * FROM CTE WHERE rn = 1
+
+
+-----------------------
+
+CREATE TABLE #t(
+    [shipperid] [int] NOT NULL,
+	[companyname] [nvarchar](40) NOT NULL,
+	[phone] [nvarchar](24) NOT NULL
+)
+
+INSERT INTO #t
+SELECT * FROM Sales.Shippers
+
+;WITH CTE AS(
+SELECT * ,
+ROW_NUMBER()OVER(PARTITION BY shipperid ORDER BY shipperid)rn
+FROM #t
+)
+---DELETE FROM CTE WHERE CTE.rn > 1
+SELECT * FROM CTE
+
+
+
+
