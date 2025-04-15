@@ -1,0 +1,22 @@
+SELECT custid , orderdate ,
+LAG(orderdate)OVER(PARTITION BY custid ORDER BY orderdate)as lag ,
+LEAD(orderdate)OVER(PARTITION BY custid ORDER BY orderdate)as lead ,  
+DATEDIFF(DAY , orderdate , LEAD(orderdate)OVER(PARTITION BY custid ORDER BY orderdate))as Diff 
+FROM Sales.Orders
+ORDER BY custid , orderdate
+ 
+ -------------------------
+
+;WITH CTE AS (
+SELECT 
+    custid, 
+    orderdate,
+    LAG(orderdate) OVER(PARTITION BY custid ORDER BY orderdate) AS lag,
+    LEAD(orderdate) OVER(PARTITION BY custid ORDER BY orderdate) AS lead,  
+    DATEDIFF(DAY, orderdate, LEAD(orderdate) OVER(PARTITION BY custid ORDER BY orderdate)) AS Diff
+FROM Sales.Orders
+),CTE2 AS(
+SELECT * ,
+AVG(Diff)OVER(PARTITION BY custid) AS DiffAvg
+FROM CTE
+)SELECT * FROM CTE2 ORDER BY custid , orderdate
