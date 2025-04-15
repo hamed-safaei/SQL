@@ -4,3 +4,14 @@ DENSE_RANK()OVER(ORDER BY qty DESC)as DensRankByQty,
 DENSE_RANK()OVER(PARTITION BY productid ORDER BY qty DESC)as DensRankByQtyWithPart 
 
 FROM Sales.OrderDetails
+
+
+------------------------------Top Customers
+WITH CTE AS (
+SELECT o.custid , YEAR(orderdate)[Year] , SUM(qty * unitprice)Amount FROM sales.Orders o
+INNER JOIN Sales.OrderDetails od ON o.orderid = od.orderid
+GROUP BY o.custid , YEAR(orderdate)
+),CTE2 AS(
+SELECT * ,
+DENSE_RANK()OVER(PARTITION BY Year ORDER BY Amount DESC)Trank
+FROM CTE ) SELECT * FROM CTE2 WHERE Trank IN ( 1 , 2 , 3 , 4) 
