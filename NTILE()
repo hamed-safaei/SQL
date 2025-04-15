@@ -1,0 +1,33 @@
+WITH cte AS (
+  SELECT 
+    custid,
+    SUM(qty * unitprice) AS amount
+  FROM Sales.OrderDetails od
+  INNER JOIN Sales.Orders o ON o.orderid = od.orderid
+  GROUP BY custid
+)
+SELECT *,
+  NTILE(10) OVER(ORDER BY amount DESC) AS rn1
+FROM cte
+
+
+
+--------------
+
+;WITH CTE AS (
+SELECT  od.productid , p.productname , SUM(od.qty*od.unitprice) AS AmountOfProduct ,
+COUNT(od.orderid) AS [count]
+FROM Sales.OrderDetails od
+INNER JOIN Production.Products p ON p.productid = od.productid
+GROUP BY od.productid , p.productname
+),CTE2 AS(
+SELECT * ,
+NTILE(10)OVER(ORDER BY CTE.count DESC ) AS RnCount
+FROM CTE
+)
+SELECT * ,
+NTILE(10)OVER(ORDER BY CTE2.AmountOfProduct DESC) AS RnAmount
+FROM CTE2
+
+
+
