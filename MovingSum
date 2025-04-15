@@ -1,0 +1,13 @@
+SELECT o.orderid , o.orderdate , SUM(qty*unitprice)OVER(ORDER BY o.orderdate) AS MovingSum
+FROM Sales.Orders o
+INNER JOIN Sales.OrderDetails od ON o.orderid = od.orderid
+
+
+
+
+SELECT o.orderid , o.orderdate ,o.custid, 
+SUM(qty * unitprice)OVER(PARTITION BY o.custid ORDER BY o.orderdate)MovingSum
+FROM Sales.Orders o
+INNER JOIN SAles.OrderDetails od ON o.orderid = od.orderid
+WHERE o.custid = 1
+ORDER BY o.custid , o.orderdate
