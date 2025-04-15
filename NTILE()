@@ -29,5 +29,22 @@ SELECT * ,
 NTILE(10)OVER(ORDER BY CTE2.AmountOfProduct DESC) AS RnAmount
 FROM CTE2
 
+--------------------
+
+;WITH CTE AS(
+SELECT c.country ,c.city ,SUM(qty * unitprice)Amount
+FROM Sales.Customers c
+INNER JOIN Sales.Orders o ON o.custid = c.custid
+INNER JOIN Sales.OrderDetails od ON od.orderid = o.orderid
+GROUP BY c.country , c.city
+),CTE2 AS(
+SELECT * ,
+NTILE(5)OVER(ORDER BY Amount DESC)RnCountry
+FROM CTE
+)
+SELECT * ,
+NTILE(5)OVER(PARTITION BY country ORDER BY Amount DESC)RnCity
+FROM CTE2
+ORDER BY country DESC
 
 
