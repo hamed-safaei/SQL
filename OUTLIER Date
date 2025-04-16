@@ -13,3 +13,39 @@ WITH cte AS (
 SELECT * FROM cte3
 WHERE zscore > 1.96 OR zscore < -1.96;
 
+
+
+-------------------------------------
+
+
+
+WITH cte AS (
+    SELECT custid, SUM(qty * unitprice) AS amount
+    FROM Sales.OrderDetails od
+    INNER JOIN Sales.Orders o ON o.orderid = od.orderid
+    GROUP BY custid
+),
+cte2 AS (
+    SELECT *,
+           PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY amount) OVER () AS Q1,
+           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY amount) OVER () AS Q3
+    FROM cte
+),
+cte3 AS (
+    SELECT *,
+           (Q3 - Q1) AS IQR,
+           (Q1 - 1.5 * (Q3 - Q1)) AS lower_bound,
+           (Q3 + 1.5 * (Q3 - Q1)) AS upper_bound
+    FROM cte2
+)
+SELECT *,
+       CASE 
+           WHEN amount < lower_bound OR amount > upper_bound THEN 1
+           ELSE 0
+       END AS is_outlier
+FROM cte3;
+
+
+
+
+
