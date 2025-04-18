@@ -1,0 +1,9 @@
+;WITH CTE AS(
+SELECT productid , SUM(qty*unitprice)AS Amount
+FROM Sales.OrderDetails 
+GROUP BY productid
+)
+SELECT *,
+ROUND(
+PERCENT_RANK()OVER(ORDER BY Amount ) , 2)PRank
+FROM CTE
