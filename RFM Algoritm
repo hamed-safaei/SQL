@@ -1,0 +1,14 @@
+WITH CTE AS(
+SELECT custid ,
+SUM(qty * unitprice) Monetary,
+COUNT(DISTINCT OD.orderid)Frequency ,
+MAX(orderdate)Recency  
+FROM Sales.OrderDetails od
+INNER JOIN Sales.Orders o ON o.orderid = od.orderid
+GROUP BY custid
+)
+SELECT * ,
+NTILE(4)OVER(ORDER BY Monetary)M,
+NTILE(4)OVER(ORDER BY Frequency)F,
+NTILE(4)OVER(ORDER BY Recency)R
+FROM CTE
