@@ -20,3 +20,20 @@ SELECT * ,
 AVG(Diff)OVER(PARTITION BY custid) AS DiffAvg
 FROM CTE
 )SELECT * FROM CTE2 ORDER BY custid , orderdate
+
+
+----------------------------
+
+
+WITH CTE AS(
+SELECT o.orderid, MAX(o.custid)custid , MAX(o.orderdate)orderdate , SUM(qty * unitprice)Amount 
+FROM Sales.Orders o
+INNER JOIN Sales.OrderDetails od ON o.orderid = od.orderid
+GROUP BY o.orderid)
+SELECT * ,
+LAG(orderdate)OVER(PARTITION BY custid ORDER BY orderdate)[Lag],
+LEAD(orderdate)OVER(PARTITION BY custid ORDER BY orderdate)[Lead],
+DATEDIFF(DAY, orderdate, LEAD(orderdate) OVER(PARTITION BY custid ORDER BY orderdate)) AS Diff ,
+SUM(Amount)OVER(PARTITION BY custid ORDER BY orderdate )MovingSum
+FROM CTE
+ORDER BY custid , orderdate 
