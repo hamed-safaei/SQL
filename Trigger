@@ -1,0 +1,71 @@
+----دیتا بیس Digi Froosh -Bi2
+
+
+SELECT * FROM Orders_H
+SELECT * FROM OrdersLog_H
+SELECT * FROM OrdersLog_Update
+SELECT * FROM OrdersLog_Delete
+
+
+----After Insert
+
+CREATE TRIGGER trg_AfterInsertOrder
+ON Orders_H
+AFTER INSERT 
+AS
+BEGIN
+INSERT INTO OrdersLog_H (OrderID , ActionDate )
+SELECT OrderID , GETDATE()
+FROM inserted ;
+END
+
+
+INSERT INTO Orders_H 
+VALUES ( 3 , 'ball')
+
+
+
+
+----- After Update
+
+CREATE TRIGGER trg_UpdateProductName
+ON Orders_H
+AFTER UPDATE
+AS
+BEGIN
+  INSERT INTO OrdersLog_Update (OrderID, BeforName, AfterUpdate, ActionDate)
+  SELECT 
+    d.OrderID,
+    d.ProductName AS BeforName,
+    i.ProductName AS AfterUpdate,
+    GETDATE()
+  FROM DELETED d
+  INNER JOIN INSERTED i ON d.OrderID = i.OrderID
+  WHERE ISNULL(d.ProductName, '') <> ISNULL(i.ProductName, ''); ---- بررسی میکنه فقط وقتی اسم محصول عوض شد این تریگر اجرا بشه و اون عملگر مقایسس
+END;
+
+UPDATE Orders_H SET ProductName = 'Apple' WHERE OrderID = 1
+
+
+
+
+
+----- After Delete
+
+
+CREATE TRIGGER trg_DeleteProduct
+ON Orders_H
+AFTER DELETE
+AS
+BEGIN
+  INSERT INTO OrdersLog_Delete (OrderID, ProductName, ActionDate)
+  SELECT 
+    OrderID,
+    ProductName,
+    GETDATE()
+  FROM DELETED 
+END;
+
+DELETE FROM Orders_H WHERE OrderID = 3
+
+----- ترانکیت بزنیم کل سطرها بپره اون موقع تریگر کار نمیکنه فقط با دیلیت
