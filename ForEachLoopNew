@@ -1,0 +1,40 @@
+SELECT CAST(GETDATE() AS DATE )AS DayDate INTO Foreachloop
+SELECT * FROM Foreachloop
+
+TRUNCATE TABLE Foreachloop
+
+DECLARE @START DATE = '2000-01-01'
+DECLARE @END DATE = '2010-12-30'
+
+
+WHILE (@START <= @END)
+BEGIN
+	INSERT INTO Foreachloop
+	SELECT @START
+	SET @START = DATEADD(DAY , 1 , @START)
+END
+
+
+
+SELECT 
+    CAST(GETDATE() AS date) AS gregoriandate,
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd'), 6) AS gregorianyearmonth,
+    FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR') AS PersianINT,
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR'), 6) AS YearMonthPer,
+    RIGHT(LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR'), 6), 2) AS PersianMonth
+FROM Foreachloop
+
+
+
+
+SELECT 
+    CAST(? AS date) AS gregoriandate,
+    LEFT(FORMAT(CAST(? AS date), 'yyyyMMdd'), 6) AS gregorianyearmonth,
+    FORMAT(CAST(? AS date), 'yyyyMMdd', 'fa-IR') AS PersianINT,
+    LEFT(FORMAT(CAST(? AS date), 'yyyyMMdd', 'fa-IR'), 6) AS YearMonthPer,
+    RIGHT(LEFT(FORMAT(CAST(? AS date), 'yyyyMMdd', 'fa-IR'), 6), 2) AS PersianMonth
+FROM Foreachloop;
+
+
+SELECT * FROM TestForEach 
+ORDER BY gregoriandate
