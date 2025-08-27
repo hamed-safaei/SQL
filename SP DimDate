@@ -1,0 +1,44 @@
+SELECT 
+    FORMAT(GETDATE(), 'yyyyMMdd') AS DateID,
+    CAST(GETDATE() AS DATE) AS GregorianDate,
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd'), 6) AS YearMonthGregorian,
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd'), 4) AS YearGregorian,
+    RIGHT(LEFT(FORMAT(GETDATE(), 'yyyyMMdd'), 6), 2) AS MonthGregorian,
+    FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR') AS PersianInt,
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR'), 6) AS PersianYearMonthInt,
+    LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR'), 4) AS PersianYearInt,
+    RIGHT(LEFT(FORMAT(GETDATE(), 'yyyyMMdd', 'fa-IR'), 6), 2) AS PersianMonthInt INTO DimDate
+
+SELECT * FROM DimDate
+
+
+
+
+
+CREATE PROCEDURE FillDimDate
+AS
+DECLARE @START DATE = '2000-01-01'
+DECLARE @END DATE = '2010-12-30'
+
+WHILE (@START <= @END)
+BEGIN
+INSERT INTO DimDate
+SELECT 
+    FORMAT(@START, 'yyyyMMdd') AS DateID,
+    CAST(@START AS DATE) AS GregorianDate,
+    LEFT(FORMAT(@START, 'yyyyMMdd'), 6) AS YearMonthGregorian,
+    LEFT(FORMAT(@START, 'yyyyMMdd'), 4) AS YearGregorian,
+    RIGHT(LEFT(FORMAT(@START, 'yyyyMMdd'), 6), 2) AS MonthGregorian,
+    FORMAT(@START, 'yyyyMMdd', 'fa-IR') AS PersianInt,
+    LEFT(FORMAT(@START, 'yyyyMMdd', 'fa-IR'), 6) AS PersianYearMonthInt,
+    LEFT(FORMAT(@START, 'yyyyMMdd', 'fa-IR'), 4) AS PersianYearInt,
+    RIGHT(LEFT(FORMAT(@START, 'yyyyMMdd', 'fa-IR'), 6), 2) AS PersianMonthInt;
+
+SET @START = DATEADD(DAY , 1 , @START )
+END
+
+
+
+
+
+ 
