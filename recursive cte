@@ -1,0 +1,17 @@
+WITH cte AS (
+    SELECT *, 1 AS Level
+    FROM HData
+    WHERE manager_id IS NULL
+
+    UNION ALL
+
+    SELECT h.id,
+           h.first_name,
+           h.role,
+           h.manager_id,
+           c.Level + 1
+    FROM cte c
+    INNER JOIN HData h ON h.manager_id = c.id
+)
+SELECT *
+FROM cte;
