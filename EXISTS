@@ -1,0 +1,10 @@
+ SELECT c.custid , c.contactname 
+ FROM Sales.Customers AS C
+ WHERE EXISTS (
+
+ SELECT custid , count(*)as [count] FROM sales.Orders AS O
+ WHERE o.custid = c.custid
+ GROUP BY custid
+ HAVING count(*) > 10
+
+ )
