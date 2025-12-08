@@ -1,0 +1,30 @@
+SELECT t1.order_id, t2.item_id, t2.quantity
+FROM (
+    SELECT DISTINCT order_id 
+    FROM sales.order_items
+) AS t1
+CROSS APPLY (
+    SELECT TOP 2 *
+    FROM sales.order_items AS t2
+    WHERE t2.order_id = t1.order_id
+    ORDER BY t2.quantity DESC
+) AS t2;
+  
+
+
+------------
+
+WITH Ranked AS (
+    SELECT 
+        order_id,
+        item_id,
+        quantity,
+        ROW_NUMBER() OVER (
+            PARTITION BY order_id 
+            ORDER BY quantity DESC
+        ) AS rn
+    FROM sales.order_items
+)
+SELECT *
+FROM Ranked
+WHERE rn <= 2
