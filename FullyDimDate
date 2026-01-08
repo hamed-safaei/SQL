@@ -1,0 +1,144 @@
+CREATE TABLE DateDimension (
+    DateId INT IDENTITY(1,1) PRIMARY KEY,
+    kDate INT,
+    MiladiDate INT,              -- yyyyMMdd به صورت عدد
+    mDate CHAR(14),              -- مثلاً 08/01/2026 12:52
+    ShamsiDate INT,              -- yyyyMMdd شمسی به صورت عدد
+    sDate INT,                   -- yyyy/MM/dd شمسی به صورت عدد (مثل 14041018)
+    sYear INT,
+    sMonth INT,
+    sDayOfMonth INT,
+    sSemiYear INT,
+    sSeason INT,
+    sDay INT,
+    sWeek INT,
+    sDayOfWeek INT,
+    sMonth_Name NVARCHAR(20),
+    sDayOfWeek_Name NVARCHAR(20),
+    sSemiYear_Name NVARCHAR(20)
+);
+
+CREATE OR ALTER PROCEDURE PopulateDateDimension
+AS
+BEGIN
+    SET NOCOUNT ON;
+	SET DATEFIRST 6;  -- شنبه = روز اول هفته
+
+    -- اگر می‌خواهید هر بار از نو پر کنید
+    TRUNCATE TABLE DateDimension;
+
+    DECLARE @StartDate DATE = '2016-01-01';
+    DECLARE @EndDate   DATE = '2030-12-31';
+    DECLARE @CurrentDate DATE = @StartDate;
+
+    WHILE @CurrentDate <= @EndDate
+    BEGIN
+        INSERT INTO DateDimension (
+            kDate,
+            MiladiDate,
+            mDate,
+            ShamsiDate,
+            sDate,
+            sYear,
+            sMonth,
+            sDayOfMonth,
+            sSemiYear,
+            sSeason,
+            sDay,
+            sWeek,
+            sDayOfWeek,
+            sMonth_Name,
+            sDayOfWeek_Name,
+            sSemiYear_Name
+        )
+        SELECT
+            DATEDIFF(DAY, '19000101', @CurrentDate) AS kDate,
+            CAST(FORMAT(@CurrentDate, 'yyyyMMdd') AS INT) AS MiladiDate,
+            CONVERT(CHAR(14), @CurrentDate, 103) AS mDate,  -- dd/mm/yyyy hh:mi (بدون ثانیه)
+            CAST(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR') AS INT) AS ShamsiDate,
+            CAST(REPLACE(FORMAT(@CurrentDate, 'yyyy/MM/dd', 'fa-IR'), '/', '') AS INT) AS sDate,
+            CAST(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 4) AS INT) AS sYear,
+            CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) AS sMonth,
+            CAST(RIGHT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 2) AS INT) AS sDayOfMonth,
+            CASE
+                WHEN CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) >= 6 THEN 2
+                ELSE 1
+            END AS sSemiYear,
+            CASE
+                WHEN CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) BETWEEN 1 AND 3 THEN 1
+                WHEN CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) BETWEEN 4 AND 6 THEN 2
+                WHEN CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) BETWEEN 7 AND 9 THEN 3
+                WHEN CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) BETWEEN 10 AND 12 THEN 4
+            END AS sSeason,
+            CAST(RIGHT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 2) AS INT) 
+            + 
+            CASE CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT)
+                WHEN 1 THEN 0
+                WHEN 2 THEN 31
+                WHEN 3 THEN 31+31
+                WHEN 4 THEN 31+31+31
+                WHEN 5 THEN 31+31+31+31
+                WHEN 6 THEN 31+31+31+31+31
+                WHEN 7 THEN 31+31+31+31+31+31
+                WHEN 8 THEN 31+31+31+31+31+31+30
+                WHEN 9 THEN 31+31+31+31+31+31+30+30
+                WHEN 10 THEN 31+31+31+31+31+31+30+30+30
+                WHEN 11 THEN 31+31+31+31+31+31+30+30+30+30
+                WHEN 12 THEN 31+31+31+31+31+31+30+30+30+30+30
+            END AS sDay,
+            CEILING(
+                (
+                    CAST(RIGHT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 2) AS INT) 
+                    + 
+                    CASE CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT)
+                        WHEN 1 THEN 0
+                        WHEN 2 THEN 31
+                        WHEN 3 THEN 31+31
+                        WHEN 4 THEN 31+31+31
+                        WHEN 5 THEN 31+31+31+31
+                        WHEN 6 THEN 31+31+31+31+31
+                        WHEN 7 THEN 31+31+31+31+31+31
+                        WHEN 8 THEN 31+31+31+31+31+31+30
+                        WHEN 9 THEN 31+31+31+31+31+31+30+30
+                        WHEN 10 THEN 31+31+31+31+31+31+30+30+30
+                        WHEN 11 THEN 31+31+31+31+31+31+30+30+30+30
+                        WHEN 12 THEN 31+31+31+31+31+31+30+30+30+30+30
+                    END
+                ) / 7.0
+            ) AS sWeek,
+            DATEPART(WEEKDAY, @CurrentDate) AS sDayOfWeek,
+            CASE RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2)
+                WHEN '01' THEN N'فروردین'
+                WHEN '02' THEN N'اردیبهشت'
+                WHEN '03' THEN N'خرداد'
+                WHEN '04' THEN N'تیر'
+                WHEN '05' THEN N'مرداد'
+                WHEN '06' THEN N'شهریور'
+                WHEN '07' THEN N'مهر'
+                WHEN '08' THEN N'آبان'
+                WHEN '09' THEN N'آذر'
+                WHEN '10' THEN N'دی'
+                WHEN '11' THEN N'بهمن'
+                WHEN '12' THEN N'اسفند'
+            END AS sMonth_Name,
+            CASE DATEPART(WEEKDAY, @CurrentDate)
+                WHEN 1 THEN N'شنبه'
+                WHEN 2 THEN N'یکشنبه'
+                WHEN 3 THEN N'دوشنبه'
+                WHEN 4 THEN N'سه‌شنبه'
+                WHEN 5 THEN N'چهارشنبه'
+                WHEN 6 THEN N'پنجشنبه'
+                WHEN 7 THEN N'جمعه'
+            END AS sDayOfWeek_Name,
+            CASE
+                WHEN CAST(RIGHT(LEFT(FORMAT(@CurrentDate, 'yyyyMMdd', 'fa-IR'), 6), 2) AS INT) >= 6 THEN N'نیمسال دوم'
+                ELSE N'نیمسال اول'
+            END AS sSemiYear_Name;
+
+        SET @CurrentDate = DATEADD(DAY, 1, @CurrentDate);
+    END
+END
+GO
+
+-- اجرا
+EXEC PopulateDateDimension;
